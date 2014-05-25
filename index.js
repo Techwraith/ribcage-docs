@@ -70,13 +70,12 @@ module.exports = function (dir) {
   var startServer = function () {
     http.createServer(function (req, res) {
       var url = req.url.split('?')[0]
-      console.log(url)
 
       if (url == '/components.json') {
         return sendComponentsJSON(req, res)
       }
 
-      if (url == '/docs') {
+      if (url == '/docs' || url == '/') {
         return sendDocs(req, res)
       }
 
@@ -97,6 +96,7 @@ module.exports = function (dir) {
       }
 
     }).listen(9001)
+    console.log('Server running. Visit http://localhost:9001/ to see the docs')
   }
   startServer()
 
