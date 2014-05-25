@@ -54,6 +54,8 @@ module.exports = function (dir) {
     for (var i in components) {
       if (components[i].readme) {
         arr.push(marked(read(components[i].name, 'README.md')))
+      } else {
+        arr.push('<h1>'+components[i].name+'</h1><p>No docs written.</p>')
       }
     }
     res.end(arr.join('<hr/>'))
