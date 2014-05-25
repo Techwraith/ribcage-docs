@@ -14,6 +14,11 @@ module.exports = function (dir) {
     return !!fs.existsSync(p)
   }
 
+  var read = function (component, file) {
+    var p = path.join(dir, component, file)
+    return fs.readFileSync(p, 'utf8')
+  }
+
   var scanComponents = function () {
     var files = wrench.readdirSyncRecursive(dir)
       , dirs = _.unique(_.map(files, function (file) {
@@ -24,38 +29,55 @@ module.exports = function (dir) {
             name: component
           , readme: exists(component, 'README.md')
           , example: exists(component, 'example')
+          , test: exists(component, 'test.js')
           }
         })
       return components
   }
 
-  var startServer = function () {
+  var sendComponentsJSON = function (req, res) {
     var components = scanComponents()
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'application/json')
+    }
+    res.end(JSON.stringify(components, null, 2))
+  }
+
+  var sendComponentReadme = function (req, res) {
+    var component = req.url.split('?')[0].split('/')[1]
+    res.end(marked(read(component, 'README.md')))
+  }
+
+  var sendDocs = function (req, res) {
+    var components = scanComponents()
+      , arr = []
+    for (var i in components) {
+      if (components[i].readme) {
+        arr.push(marked(read(components[i].name, 'README.md')))
+      }
+    }
+    res.end(arr.join('<hr/>'))
+  }
+
+  var startServer = function () {
     http.createServer(function (req, res) {
       var url = req.url.split('?')[0]
-      http.createServer(function (req, res) {
+      console.log(url)
 
-        switch (url) {
-          case args.js.alias || args.js.entry:
-            js(args.js, responder('javascript', res))
-            break
+      if (url == '/components.json') {
+        return sendComponentsJSON(req, res)
+      }
 
-          case args.css.alias || args.css.entry:
-            css(args.css, responder('css', res))
-            break
+      if (url.indexOf('readme.html') > -1) {
+        return sendComponentReadme(req, res)
+      }
 
-          case '/default':
-            serveDefaultPage(res, args, lr)
-            break
+      if (url == '/docs') {
+        return sendDocs(req, res)
+      }
 
-          default:
-            if (lr && req.url.substr(-5) === '.html') res.filter = injectLiveReloadScript(lr)
-            mount(req, res)
-            break
-        }
-
-      }).listen(port)
-    })
+    }).listen(9001)
   }
+  startServer()
 
 }
