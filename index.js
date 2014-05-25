@@ -76,12 +76,24 @@ module.exports = function (dir) {
         return sendComponentsJSON(req, res)
       }
 
+      if (url == '/docs') {
+        return sendDocs(req, res)
+      }
+
       if (url.indexOf('readme.html') > -1) {
         return sendComponentReadme(req, res)
       }
 
-      if (url == '/docs') {
-        return sendDocs(req, res)
+      if (url.indexOf('example.html') > -1) {
+        //return sendComponentExampleHtml(req, res)
+      }
+
+      if (url.indexOf('example.js') > -1) {
+        //return sendComponentExampleJs(req, res)
+      }
+
+      if (url.indexOf('example.css') > -1) {
+        //return sendComponentExampleCss(req, res)
       }
 
     }).listen(9001)
