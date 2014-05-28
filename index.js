@@ -2,10 +2,25 @@ var marked = require('marked')
   , wrench = require('wrench')
   , js = require('atomify-js')
   , css = require('atomify-css')
+  , handlebars = require('handlebars')
   , fs = require('fs')
   , path = require('path')
   , http = require('http')
+  , change = require('change-case')
   , _ = require('lodash')
+
+var renderer = new marked.Renderer();
+
+renderer.heading = function (text, level) {
+  var ret = ''
+  if (level === 1) {
+    ret = '<h' + level + '><a name="' + change.pascal(text) + '">'+text+'</a></h' + level + '>'
+  } else {
+    ret = '<h' + level + '>'+text+'</h'+level+'>'
+  }
+  return ret
+}
+
 
 module.exports = function (dir) {
 
@@ -27,6 +42,7 @@ module.exports = function (dir) {
       , components = _.map(dirs, function (component) {
           return {
             name: component
+          , pascal: change.pascal(component)
           , readme: exists(component, 'README.md')
           , example: exists(component, 'example')
           , test: exists(component, 'test.js')
@@ -59,12 +75,19 @@ module.exports = function (dir) {
       , arr = []
     for (var i in components) {
       if (components[i].readme) {
-        arr.push(marked(read(components[i].name, 'README.md')))
+        components[i].htmlReadme = marked(read(components[i].name, 'README.md'), {renderer: renderer})
       } else {
-        arr.push('<h1>'+components[i].name+'</h1><p>No docs written.</p>')
+        components[i].htmlReadme = '<h1><a name="'+components[i].pascal+'">'+components[i].name+'</a></h1><p>No docs written.</p>'
       }
     }
-    res.end(arr.join('<hr/>'))
+
+    var template = handlebars.compile(fs.readFileSync(path.join(__dirname, 'index.html.hbs'), 'utf8'))
+
+    var html = template({
+      components: components
+    })
+
+    res.end(html)
   }
 
   var startServer = function () {
