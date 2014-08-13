@@ -51,14 +51,6 @@ module.exports = function (dir) {
       return components
   }
 
-  var sendComponentsJSON = function (req, res) {
-    var components = scanComponents()
-    if (!res.headersSent) {
-      res.setHeader('Content-Type', 'application/json')
-    }
-    res.end(JSON.stringify(components, null, 2))
-  }
-
   var sendComponentReadme = function (req, res) {
     var component = req.url.split('?')[0].split('/')[1]
       , html
@@ -70,14 +62,70 @@ module.exports = function (dir) {
     res.end(html)
   }
 
+  var sendComponentExampleJS = function (req, res) {
+    var components = scanComponents()
+      , component = req.url.split('?')[0].split('/')[1]
+
+    if (!exists(component, path.join('example', 'entry.js'))) {
+      return res.end('no example')
+    }
+
+    var opts = {
+      entry: path.join(dir, component, 'example', 'entry.js')
+    , debug: true // default: `false`
+    }
+
+    js(opts, responder('css', res))
+  }
+
+  var sendComponentExampleCSS = function (req, res) {
+    var components = scanComponents()
+      , component = req.url.split('?')[0].split('/')[1]
+
+    if (!exists(component, path.join('example', 'entry.css'))) {
+      return res.end('no example')
+    }
+
+    var opts = {
+      entry: path.join(dir, component, 'example', 'entry.css')
+    , debug: true // default: `false`
+    }
+
+    css(opts, responder('css', res))
+  }
+
+  var sendComponentExampleHTML = function (req, res) {
+    var components = scanComponents()
+      , component = req.url.split('?')[0].split('/')[1]
+
+    var src = '<!doctype html><html><head>'
+    src += '<meta charset="utf-8">'
+    src += '<meta http-equiv="X-UA-Compatible" content="IE=edge">'
+    src += '<meta name="viewport" content="initial-scale=1,width=device-width,user-scalable=0,minimal-ui">'
+    src += '<title>Example for '+component+'</title>'
+    src += '<link rel="stylesheet" href="/'+component+'/example.css">'
+    src += '</head><body>'
+    src += '<script src="/'+component+'/example.js"></script>'
+    src += '</body></html>'
+
+    res.setHeader('Content-Type', 'text/html')
+    res.end(src)
+  }
+
   var sendDocs = function (req, res) {
     var components = scanComponents()
       , arr = []
     for (var i in components) {
+
+      var iframe = ''
+      if (components[i].example) {
+        iframe = '<iframe src="/'+components[i].name+'/example.html" width="100%" height="500"></iframe>'
+      }
+
       if (components[i].readme) {
-        components[i].htmlReadme = marked(read(components[i].name, 'README.md'), {renderer: renderer})
+        components[i].htmlReadme = iframe + marked(read(components[i].name, 'README.md'), {renderer: renderer})
       } else {
-        components[i].htmlReadme = '<h1><a name="'+components[i].pascal+'">'+components[i].name+'</a></h1><p>No docs written.</p>'
+        components[i].htmlReadme = '<h1><a name="'+components[i].pascal+'">'+components[i].name+'</a></h1>'+iframe+'<p>No docs written.</p>'
       }
     }
 
@@ -90,16 +138,47 @@ module.exports = function (dir) {
     res.end(html)
   }
 
+  var sendCSS = function (req, res) {
+    var opts = {
+      entry: './pages/docs/entry.css'
+    , debug: true // default: `false`
+    }
+
+    css(opts, responder('css', res))
+  }
+
+  var sendJS = function (req, res) {
+    var opts = {
+      entry: './pages/docs/entry.js'
+    , debug: true // default: `false`
+    }
+
+    js(opts, responder('css', res))
+  }
+
+  var responder = function (type, res) {
+    return function (err, src) {
+      if (err) console.log(err);
+
+      if (!res.headersSent) res.setHeader('Content-Type', 'text/' + type)
+      res.end(src)
+    }
+  }
+
   var startServer = function () {
     http.createServer(function (req, res) {
       var url = req.url.split('?')[0]
 
-      if (url == '/components.json') {
-        return sendComponentsJSON(req, res)
-      }
-
       if (url == '/docs' || url == '/') {
         return sendDocs(req, res)
+      }
+
+      if (url == "/style.css") {
+        return sendCSS(req, res)
+      }
+
+      if (url == "/site.js") {
+        return sendJS(req, res)
       }
 
       if (url.indexOf('readme.html') > -1) {
@@ -107,15 +186,15 @@ module.exports = function (dir) {
       }
 
       if (url.indexOf('example.html') > -1) {
-        //return sendComponentExampleHtml(req, res)
+        return sendComponentExampleHTML(req, res)
       }
 
       if (url.indexOf('example.js') > -1) {
-        //return sendComponentExampleJs(req, res)
+        return sendComponentExampleJS(req, res)
       }
 
       if (url.indexOf('example.css') > -1) {
-        //return sendComponentExampleCss(req, res)
+        return sendComponentExampleCSS(req, res)
       }
 
     }).listen(9001)
