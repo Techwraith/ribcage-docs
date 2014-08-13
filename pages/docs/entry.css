@@ -30,13 +30,13 @@ html, body {
 }
 
 .sidebar li {
-  line-height: 2.5em;
-  padding: 1em;
   border-bottom: 1px solid #ccc;
 }
 
 .sidebar a {
+  display: block;
   text-decoration: none;
+  padding: 1em;
   color: #000;
 }
 
