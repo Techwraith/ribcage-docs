@@ -141,7 +141,7 @@ module.exports = function (dir) {
 
   var sendCSS = function (req, res) {
     var opts = {
-      entry: './pages/docs/entry.css'
+      entry: path.join(__dirname, 'pages', 'docs', 'entry.css')
     , debug: true // default: `false`
     }
 
@@ -150,7 +150,7 @@ module.exports = function (dir) {
 
   var sendJS = function (req, res) {
     var opts = {
-      entry: './pages/docs/entry.js'
+      entry: path.join(__dirname, 'pages', 'docs', 'entry.js')
     , debug: true // default: `false`
     }
 
