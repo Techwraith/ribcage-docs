@@ -1,11 +1,8 @@
 {
   "name": "ribcage-docs",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Generate a doc site for a given components directory",
   "main": "index.js",
-  "bin": {
-    "ribcage-docs": "cli.js"
-  },
   "dependencies": {
     "atomify": "^3.0.0",
     "change-case": "^2.1.1",
