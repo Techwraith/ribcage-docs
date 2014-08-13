@@ -1,6 +1,6 @@
 {
   "name": "ribcage-docs",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Generate a doc site for a given components directory",
   "main": "index.js",
   "bin": {
