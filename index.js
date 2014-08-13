@@ -1,13 +1,14 @@
 var marked = require('marked')
   , wrench = require('wrench')
-  , js = require('atomify-js')
-  , css = require('atomify-css')
+  , atomify = require('atomify')
   , handlebars = require('handlebars')
   , fs = require('fs')
   , path = require('path')
   , http = require('http')
   , change = require('change-case')
   , _ = require('lodash')
+  , js = atomify.js
+  , css = atomify.css
 
 var renderer = new marked.Renderer();
 
