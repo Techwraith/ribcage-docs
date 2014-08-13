@@ -37,6 +37,7 @@ module.exports = function (dir) {
 
   var scanComponents = function () {
     var files = wrench.readdirSyncRecursive(dir)
+      , blackListedComponentNames = ['.DS_Store', 'README.md']
       , dirs = _.unique(_.map(files, function (file) {
           return file.split('/')[0]
         }))
@@ -49,7 +50,9 @@ module.exports = function (dir) {
           , test: exists(component, 'test.js')
           }
         })
-      return components
+      return _.filter(components, function (component){
+        return blackListedComponentNames.indexOf(component.name) === -1
+      })
   }
 
   var sendComponentReadme = function (req, res) {
