@@ -59,8 +59,9 @@ module.exports = function (dir) {
 
   var sendComponentReadme = function (req, res) {
     var component = req.url.split('?')[0].split('/')[1]
-      , html
-    if (exits(component, 'README.md')) {
+      , html = ''
+
+    if (exists(component, 'README.md')) {
       html = marked(read(component, 'README.md'))
     } else {
       html = '<h1>'+component+'<h1><p>No docs written.</p>'
