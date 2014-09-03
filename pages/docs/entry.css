@@ -1,5 +1,10 @@
 @import "github-markdown-css/github-markdown.css";
 
+:root{
+  var-font-family-sans: 'Helvetica Neue' Helvetica sans-serif;
+  var-font-family-mono: 'Source Code Pro' 'Inconsolata' mono;
+}
+
 html * {
   box-sizing: border-box;
 }
@@ -20,6 +25,7 @@ html, body {
   width: 15em;
   float: left;
   border-right: 1px solid #ccc;
+  font-family: var(font-family-sans);
 }
 
 .sidebar ul {
@@ -34,10 +40,30 @@ html, body {
 }
 
 .sidebar a {
+  /* block so that it fills the whole li */
   display: block;
+  /* relative so that the span can be absolute */
+  position: relative;
+  /* remove the default link style */
   text-decoration: none;
+
   padding: 1em;
-  color: #000;
+  color: #111;
+}
+
+.sidebar span {
+  /* push to the upper right of the li */
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  padding: .1em .5em;
+  background: #eee;
+
+  font-family: var(font-family-mono);
+  font-size: .8em;
+  font-variant: small-caps;
 }
 
 .content {

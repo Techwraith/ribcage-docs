@@ -11,7 +11,7 @@
       <ul>
       {{#each components}}
         <li>
-          <a href="#{{pascal}}">{{name}}</a>
+          <a href="#{{pascal}}">{{name}}{{#if section}}<span>{{section}}</span>{{/if}}</a>
         </li>
       {{/each}}
       </ul>
