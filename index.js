@@ -40,13 +40,32 @@ module.exports = function (dir) {
   var scanComponents = function () {
     var files = wrench.readdirSyncRecursive(dir)
       , blackListedComponentNames = ['.DS_Store', 'README.md']
-      , dirs = _.unique(_.map(files, function (file) {
-          return file.split('/')[0]
-        }))
+      , dirs = _.unique(_.compact(_.map(files, function (filePath) {
+          var file = path.basename(filePath)
+
+          if (file === 'index.js' || file === 'index.css')
+            return path.dirname(filePath)
+          else
+            return false
+        })))
       , components = _.map(dirs, function (component) {
+          var pathParts = component.split('/')
+            , name = ''
+            , section = ''
+
+          if (pathParts.length > 1) {
+            name = path.basename(component)
+            section = _.initial(pathParts).join('/')
+          }
+          else {
+            name = component
+          }
+
           return {
-            name: component
-          , pascal: change.pascal(component)
+            name: name
+          , section: section
+          , path: component
+          , pascal: change.pascal(name)
           , readme: exists(component, 'README.md')
           , example: exists(component, 'example')
           , test: exists(component, 'test.js')
