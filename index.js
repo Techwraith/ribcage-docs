@@ -163,7 +163,7 @@ module.exports = function (dir) {
 
   var responder = function (type, res) {
     return function (err, src) {
-      if (err) console.log(err);
+      if (err) console.error(err);
 
       if (!res.headersSent) res.setHeader('Content-Type', 'text/' + type)
       res.end(src)
@@ -203,7 +203,7 @@ module.exports = function (dir) {
       }
 
     }).listen(9001)
-    console.log('Server running. Visit http://localhost:9001/ to see the docs')
+    console.info('Server running. Visit http://localhost:9001/ to see the docs')
   }
   startServer()
 
