@@ -1,3 +1,5 @@
+'use strict';
+
 var marked = require('marked')
   , wrench = require('wrench')
   , atomify = require('atomify')
@@ -25,12 +27,12 @@ renderer.heading = function (text, level) {
 
 module.exports = function (dir) {
 
-  var exists = function (component, file) {
+  var exists = function exists(component, file) {
     var p = path.join(dir, component, file)
     return !!fs.existsSync(p)
   }
 
-  var read = function (component, file) {
+  var read = function read(component, file) {
     var p = path.join(dir, component, file)
     return fs.readFileSync(p, 'utf8')
   }
@@ -67,8 +69,7 @@ module.exports = function (dir) {
   }
 
   var sendComponentExampleJS = function (req, res) {
-    var components = scanComponents()
-      , component = req.url.split('?')[0].split('/')[1]
+    var component = req.url.split('?')[0].split('/')[1]
 
     if (!exists(component, path.join('example', 'entry.js'))) {
       return res.end('no example')
@@ -83,8 +84,7 @@ module.exports = function (dir) {
   }
 
   var sendComponentExampleCSS = function (req, res) {
-    var components = scanComponents()
-      , component = req.url.split('?')[0].split('/')[1]
+    var component = req.url.split('?')[0].split('/')[1]
 
     if (!exists(component, path.join('example', 'entry.css'))) {
       return res.end('no example')
@@ -99,8 +99,7 @@ module.exports = function (dir) {
   }
 
   var sendComponentExampleHTML = function (req, res) {
-    var components = scanComponents()
-      , component = req.url.split('?')[0].split('/')[1]
+    var component = req.url.split('?')[0].split('/')[1]
 
     var src = '<!doctype html><html><head>'
     src += '<meta charset="utf-8">'
@@ -118,18 +117,20 @@ module.exports = function (dir) {
 
   var sendDocs = function (req, res) {
     var components = scanComponents()
-      , arr = []
-    for (var i in components) {
+      , iframe = ''
 
-      var iframe = ''
-      if (components[i].example) {
-        iframe = '<iframe src="/'+components[i].name+'/example.html" width="100%" height="500"></iframe>'
-      }
+    for(var i in components) {
+      if (components.hasOwnProperty(i)){
+        iframe = ''
+        if (components[i].example) {
+          iframe = '<iframe src="/'+components[i].path+'/example.html" width="100%" height="500"></iframe>'
+        }
 
-      if (components[i].readme) {
-        components[i].htmlReadme = iframe + marked(read(components[i].name, 'README.md'), {renderer: renderer})
-      } else {
-        components[i].htmlReadme = '<h1><a name="'+components[i].pascal+'">'+components[i].name+'</a></h1>'+iframe+'<p>No docs written.</p>'
+        if (components[i].readme) {
+          components[i].htmlReadme = iframe + marked(read(components[i].path, 'README.md'), {renderer: renderer})
+        } else {
+          components[i].htmlReadme = '<h1><a name="'+components[i].pascal+'">'+components[i].name+'</a></h1>'+iframe+'<p>No docs written.</p>'
+        }
       }
     }
 
@@ -173,15 +174,15 @@ module.exports = function (dir) {
     http.createServer(function (req, res) {
       var url = req.url.split('?')[0]
 
-      if (url == '/docs' || url == '/') {
+      if (url === '/docs' || url === '/') {
         return sendDocs(req, res)
       }
 
-      if (url == "/style.css") {
+      if (url === '/style.css') {
         return sendCSS(req, res)
       }
 
-      if (url == "/site.js") {
+      if (url === '/site.js') {
         return sendJS(req, res)
       }
 
